@@ -1,0 +1,9 @@
+{
+  "name": "gpu-sandbox",
+  "version": "0.0.0",
+  "description": "experimenting with GPU/Webgpl",
+  "scripts": {},
+  "keywords": [],
+  "author": "swiing",
+  "type": "module"
+}
