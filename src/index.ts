@@ -1,27 +1,37 @@
-// This file is a simple test to check if the gl package works as expected.
-// Taken from https://github.com/stackgl/headless-gl?tab=readme-ov-file#example
+import measurePerformance from "./utils/measurePerformance.ts";
 
-// Create context
-import createGL from "gl";
+import getMinMaxCpu from "./cpu/index.ts";
+import getMinMaxGpu, { prepare } from "./webgl2/index.ts";
 
-const width = 64;
-const height = 64;
+/**
+ * compute the min and the max of an array of floats.
+ */
 
-const gl = createGL(width, height, { preserveDrawingBuffer: true });
+// arbitrary size of the array, e.g. 100_000, and max value for floats, e.g. 1000
+const length = 100_000;
+const MAX = 1_000;
 
-//Clear screen to red
-gl.clearColor(1, 0, 0, 1);
-gl.clear(gl.COLOR_BUFFER_BIT);
+// Some arbitrary array of floats
+const data = new Float32Array(
+  // can be fixed values, e.g.
+  // [0.3, 12.7, 0.2, 0.3, 0.3, 0.8]
 
-//Write output as a PPM formatted image
-const pixels = new Uint8Array(width * height * 4);
-gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-process.stdout.write(
-  ["P3\n# gl.ppm\n", width, " ", height, "\n255\n"].join(""),
+  // or random, e.g.
+  // (beware of size limit, as per https://github.com/openclaw/openclaw/issues/20789)
+  Array.from({ length }, (_, i) => Math.random() * MAX),
 );
 
-for (let i = 0; i < pixels.length; i += 4) {
-  for (let j = 0; j < 3; ++j) {
-    process.stdout.write(pixels[i + j] + " ");
-  }
-}
+/**
+ * compute via gpu
+ */
+const { gl, program, fb, targetTexture, vao, bufferInfo } = prepare(data);
+measurePerformance(function GPU() {
+  return getMinMaxGpu(gl, { program, fb, targetTexture, vao, bufferInfo });
+});
+
+/**
+ * compute via cpu
+ */
+measurePerformance(function CPU() {
+  return getMinMaxCpu(data);
+});
