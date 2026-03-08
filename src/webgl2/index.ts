@@ -78,9 +78,11 @@ export default function getMinMax(
     vao: WebGLVertexArrayObject;
     bufferInfo: { numElements: number };
   },
+  begin = 0,
+  end = bufferInfo.numElements - begin,
 ) {
   // compute the min and the max in gpu
-  render(gl, program, fb, targetTexture, vao, bufferInfo);
+  render(gl, program, fb, targetTexture, vao, bufferInfo, begin, end);
 
   // read the result from gpu
   const result = new Float32Array(

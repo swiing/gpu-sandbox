@@ -5,6 +5,8 @@ export default function render(
   targetTexture: WebGLTexture,
   vao: WebGLVertexArrayObject,
   bufferInfo: { numElements: number },
+  begin = 0,
+  end = bufferInfo.numElements - begin,
 ) {
   gl.useProgram(program);
   {
@@ -28,11 +30,11 @@ export default function render(
     // Bind the attribute/buffer set we want.
     gl.bindVertexArray(vao);
 
-    const offset = 0;
+    // const offset = 0;
     gl.drawArraysInstanced(
       gl.POINTS, // primitiveType,
-      offset,
-      bufferInfo.numElements - offset, // count,
+      begin,
+      end - begin, // count,
       2, // go through eah value twice, once for determining min, once for max
     );
   }
